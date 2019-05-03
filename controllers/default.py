@@ -1,3 +1,4 @@
+import grafo
 # -*- coding: utf-8 -*-
 # -------------------------------------------------------------------------
 # This is a sample controller
@@ -8,8 +9,9 @@
 
 
 def index():
+    grf = grafo.gerar_grafo_randomico(20)
     response.flash = T("Hello World")
-    return dict(message=T('Welcome to web2py!'))
+    return dict(message=T('Welcome to web2py!'), grafo=list(grf))
 
 # ---- API (example) -----
 @auth.requires_login()

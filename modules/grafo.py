@@ -7,20 +7,27 @@ def gerar_grafo_randomico(qtd_vertices):
     vertices = []
     arestas = []
     qtd_vertices = int(qtd_vertices)
-    vertices.append(range(1, (qtd_vertices + 1)))
+    for v in range(1, (qtd_vertices + 1)):
+        vertices.append(v)
     for vp in vertices:
-        qtd_arestas = randint(1, (qtd_vertices + 1))
+        qtd_arestas = randint(1, (qtd_vertices - 1))
         v_destinos = sample(vertices, qtd_arestas)
         for vd in v_destinos:
-            if vp is vd:
-                v_desvios = v_destinos.remove(vd)
-                vd = sample(v_desvios, 1)
-            arestas.append([vp, vd])
-
-    return dict(grafo=gerar_grafo_randomico)
+            while vp is vd:
+                desvio = vd
+                v_destinos.remove(vd)
+                if len(v_destinos) > 1:
+                    vd = sample(v_destinos, 1)[0]
+                else:
+                    v_destinos.insert(0, desvio)
+                    break
+            if [vd, vp] not in arestas:
+                arestas.append([vp, vd])
+    return {"nome": nome, "vertices": vertices, "arestas": arestas}
 
 
 def ler_grafo_de(arq):
+    json.dumps(arq)
     g = json.loads(arq)
     return g
 

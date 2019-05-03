@@ -1,0 +1,14 @@
+{
+   "nome":"grafo 2",
+   "tipo":"Simples",
+   "vertices":[
+      "1",
+	  "2"
+   ],
+   "arestas":[
+      [
+		"1",
+		"2"
+      ]
+   ]
+}

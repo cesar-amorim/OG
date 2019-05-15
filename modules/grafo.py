@@ -2,6 +2,17 @@ from random import *
 import json
 
 
+class Grafo:
+    def __init__(self, qtd_vertices):
+        self.qtd_vertices = qtd_vertices
+        self.nome = "grafo_" + str(self.qtd_vertices)
+        self.vertices = list(range(1, int(qtd_vertices)))
+        self.arestas = []
+
+    def gerate_arestas(self):
+        pass
+
+
 def gerar_grafo_randomico(qtd_vertices):
     nome = ("grafo_" + str(qtd_vertices))
     vertices = []
@@ -10,7 +21,7 @@ def gerar_grafo_randomico(qtd_vertices):
     for v in range(1, (qtd_vertices + 1)):
         vertices.append(v)
     for vp in vertices:
-        qtd_arestas = randint(1, (qtd_vertices - 1))
+        qtd_arestas = randint(1, round((qtd_vertices - 1)/2) + 1)
         v_destinos = sample(vertices, qtd_arestas)
         for vd in v_destinos:
             while vp is vd:
@@ -27,9 +38,45 @@ def gerar_grafo_randomico(qtd_vertices):
 
 
 def ler_grafo_de(arq):
-    json.dumps(arq)
-    g = json.loads(arq)
+    if not isinstance(arq, _io.TextIOWrapper):
+        raise TypeError("arq deve ser um arquivo")
+    else:
+        g = json.load(arq)
     return g
+
+
+# class Grafo(dict):
+#     # def _get_grafo(self):
+#     #     return self.__grafo
+#     #
+#     # def _set_grafo(self, value):
+#     #     if not isinstance(value, dict):
+#     #         raise TypeError("g deve ser um Dicionário")
+#     #     self.__grafo = value
+#
+#     def _get_nome(self):
+#         return self.nome
+#
+#     def _set_nome(self, valor):
+#         if not isinstance(valor, str):
+#             raise TypeError("O valor deve ser uma string")
+#
+#     nome = property(_get_nome, _set_nome)
+#
+#     def _get_vertices(self):
+#         return self.vertices
+#
+#     def _set_vertices(self, valor):
+#         if not isinstance(valor, list):
+#             raise TypeError("O valor deve ser uma lista")
+#
+#     vertices = property(_get_vertices, _set_vertices)
+#
+#     # grafo = property(_get_grafo, _set_grafo)
+
+
+def transforma_em_mda(g):
+    return []
 
 
 def adiciona_vertice_em(arq, v=int):

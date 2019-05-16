@@ -1,4 +1,4 @@
-from random import *
+from random import sample, randint
 import json
 
 
@@ -6,11 +6,59 @@ class Grafo:
     def __init__(self, qtd_vertices):
         self.qtd_vertices = qtd_vertices
         self.nome = "grafo_" + str(self.qtd_vertices)
-        self.vertices = list(range(1, int(qtd_vertices)))
+        self.vertices = list(range(1, int(qtd_vertices + 1)))
         self.arestas = []
 
-    def gerate_arestas(self):
+    def gerate_arestas(self, vertices, qtd_arestas):
+        if not vertices:
+            vertices = self.vertices
+            for vp in vertices:
+                v_dest = sample(vertices, qtd_arestas)
+                for vd in v_dest:
+                    while vp is vd:
+                        desvio = vd
+                        v_dest.remove(vd)
+                        if len(v_dest) > 1:
+                            vd = sample(v_dest, 1)[0]
+                        else:
+                            v_dest.insert(0, desvio)
+                            break
+                    if [vd, vp] not in self.arestas:
+                        self.arestas.append([vp, vd])
+        return len(self.arestas)
+
+    def insert_vertice(self):
+        # inserir vertice da lista de vertices
         pass
+
+    def remove_vertice(self):
+        # remover vertice da lista de vertices
+        # remover arestas que possuem esse vertice
+        pass
+
+    def insert_aresta(self):
+        # verificar existencia, caso não exista:
+        #    # inserir aresta da lista de arestas
+        pass
+
+    def remove_aresta(self):
+        # verificar existencia, caso exista:
+        #   # remover aresta da lista de arestas
+        pass
+
+    def vizinhos(self, vertice):
+        # verificar se existe arestas que contem o vertice
+        # adicionar o outro vertice da aresta a lista
+        # retornar a lista de vizinhos
+        pass
+
+
+def ler_de_arquivo(arq):
+    pass
+
+
+def salvar_em_arquivo(grafo, arq):
+    pass
 
 
 def gerar_grafo_randomico(qtd_vertices):

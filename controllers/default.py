@@ -1,4 +1,4 @@
-import grafo
+from grafo import Grafo
 # -*- coding: utf-8 -*-
 # -------------------------------------------------------------------------
 # This is a sample controller
@@ -9,7 +9,7 @@ import grafo
 
 
 def index():
-    grf = grafo.gerar_grafo_randomico(20)
+    grf = Grafo(20)
     response.flash = T("Hello World")
     return dict(message=T('Welcome to web2py!'), grafo=list(grf))
 

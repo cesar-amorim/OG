@@ -1,5 +1,26 @@
 from random import sample, randint
-import json
+# import json
+import ast
+import itertools
+
+
+class Vertice:
+    def __init__(self, nome):
+        self.nome = str(nome)
+        self.visit = False
+        self.adjcs = []
+
+    @property
+    def __str__(self):
+        return self.nome
+
+
+class Aresta:
+    def __init__(self, nome):
+        self.nome = str(nome)
+        self.visit = False
+        self.explo = False
+        self.desco = False
 
 
 class Grafo:
@@ -8,17 +29,21 @@ class Grafo:
         self.nome = "grafo_" + str(self.qtd_vertices)
         self.vertices = list(range(1, int(qtd_vertices + 1)))
         self.arestas = []
+        self.lista_adjacencia = []
+        self.matriz_adjacencia = []
+        for lin in self.vertices:
+            self.matriz_adjacencia.append(list(itertools.repeat(0, int(qtd_vertices))))
 
     def __iter__(self):
         yield self.nome
         yield from self.vertices
         yield from self.arestas
 
-    def gerate_arestas(self, vertices, qtd_arestas):
+    def gerate_arestas(self, vertices, qtd_arestas_max):
         if not vertices:
             vertices = self.vertices
             for vp in vertices:
-                v_dest = sample(vertices, qtd_arestas)
+                v_dest = sample(vertices, randint(0, qtd_arestas_max))
                 for vd in v_dest:
                     while vp is vd:
                         desvio = vd
@@ -28,17 +53,27 @@ class Grafo:
                         else:
                             v_dest.insert(0, desvio)
                             break
-                    if [vd, vp] not in self.arestas:
+                    if ([vd, vp] or [vp, vd]) not in self.arestas:
                         self.arestas.append([vp, vd])
+                        self.matriz_adjacencia[vd][vp] = 1  # atualiza a matriz de adjacencias
+                        self.matriz_adjacencia[vp][vd] = 1
         return len(self.arestas)
+
+    def purge_arestas(self):
+        if len(self.arestas) != 0:
+            self.arestas.clear()
+            for lin in self.vertices:
+                self.matriz_adjacencia.append(list(itertools.repeat(0, int(self.qtd_vertices))))
 
     def insert_vertices(self, vertice):
         # inserir vertice da lista de vertices
         if type(vertice) is list:
             for v in vertice:
                 self.vertices.append(v)
+                self.matriz_adjacencia.append(list(itertools.repeat(0, int(len(self.vertices)))))
         else:
             self.vertices.append(vertice)
+            self.matriz_adjacencia.append(list(itertools.repeat(0, int(len(self.vertices)))))
 
     def remove_vertices(self, vertice):
         # remover vertice da lista de vertices
@@ -65,6 +100,9 @@ class Grafo:
             if aresta not in self.arestas:  # Verificar se já existe a aresta
                 self.arestas.append(aresta)
                 self.arestas.sort()
+                # atualiza a matriz de adjacência
+                self.matriz_adjacencia[aresta[0]][aresta[1]] = 1
+                self.matriz_adjacencia[aresta[1]][aresta[0]] = 1
             else:
                 raise ValueError("A aresta " + str(aresta) + "já existe neste grafo")
         else:
@@ -76,6 +114,9 @@ class Grafo:
                 raise ValueError("A aresta " + str(aresta) + "não existe neste grafo")
             else:
                 self.arestas.remove(aresta)
+                # atualiza a matriz de adjacência
+                self.matriz_adjacencia[aresta[0]][aresta[1]] = 0
+                self.matriz_adjacencia[aresta[1]][aresta[0]] = 0
         else:
             raise TypeError("A aresta deve ser uma lista com apenas 2 valores\n informado: " + str(aresta))
 
@@ -87,15 +128,26 @@ class Grafo:
                 for v in aresta:
                     if vertice in aresta:
                         if str(v) != str(vertice):
-                            vizinhos.append(vertice)  # adicionar o outro vertice da aresta a lista
+                            vizinhos.append(v)  # adicionar o outro vertice da aresta a lista
         else:
             raise ValueError("Vertice não encontrado no grafo: " + str(vertice))
         # retornar a lista de vizinhos
+        vizinhos.sort()
         return vizinhos
 
 
 def ler_de_arquivo(arq):
-    pass
+    cont = open(arq, 'r').read()
+    dic = ast.literal_eval(cont)
+    grf = Grafo(0)
+    grf.nome = dic['nome']
+    grf.vertices = dic['vertices']
+    grf.arestas = dic['arestas']
+    return grf
+
+
+def transforma_em_mda(g):
+    return []
 
 
 def salvar_em_arquivo(grafo, arq):
@@ -126,12 +178,12 @@ def salvar_em_arquivo(grafo, arq):
 #     return {"nome": nome, "vertices": vertices, "arestas": arestas}
 
 
-def ler_grafo_de(arq):
-    if not isinstance(arq, _io.TextIOWrapper):
-        raise TypeError("arq deve ser um arquivo")
-    else:
-        g = json.load(arq)
-    return g
+# def ler_grafo_de(arq):
+#     if not isinstance(arq, _io.TextIOWrapper):
+#         raise TypeError("arq deve ser um arquivo")
+#     else:
+#         g = json.load(arq)
+#     return g
 
 
 # class Grafo(dict):
@@ -164,24 +216,22 @@ def ler_grafo_de(arq):
 #     # grafo = property(_get_grafo, _set_grafo)
 
 
-def transforma_em_mda(g):
-    return []
 
 
-def adiciona_vertice_em(arq, v=int):
-    g = {}
-    g.update(ler_grafo_de(arq))
-    vertices = g['vertices']
-    vertices.append[v]
-    return dict(grafo=g)
-
-
-def remove_vertice_em(arq, v=int):
-    g = {}
-    g.update(ler_grafo_de(arq))
-    list(g['vertices']).remove(v)
-    for e in list(g['arestas']):
-        list(e).remove(v)
-        if len(list(e)) < 2:
-            list(e).clear()
-    return dict(grafo=g)
+# def adiciona_vertice_em(arq, v=int):
+#     g = {}
+#     g.update(ler_grafo_de(arq))
+#     vertices = g['vertices']
+#     vertices.append[v]
+#     return dict(grafo=g)
+#
+#
+# def remove_vertice_em(arq, v=int):
+#     g = {}
+#     g.update(ler_grafo_de(arq))
+#     list(g['vertices']).remove(v)
+#     for e in list(g['arestas']):
+#         list(e).remove(v)
+#         if len(list(e)) < 2:
+#             list(e).clear()
+#     return dict(grafo=g)

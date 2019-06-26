@@ -18,6 +18,8 @@ class Vertice:
 class Aresta:
     def __init__(self, nome):
         self.nome = str(nome)
+        self.vert_ini = Vertice(nome[0])
+        self.vert_des = Vertice(nome[1])
         self.visit = False
         self.explo = False
         self.desco = False
@@ -27,17 +29,27 @@ class Grafo:
     def __init__(self, qtd_vertices):
         self.qtd_vertices = qtd_vertices
         self.nome = "grafo_" + str(self.qtd_vertices)
-        self.vertices = list(range(1, int(qtd_vertices + 1)))
+        __vertice_list__ = list(range(1, int(qtd_vertices + 1)))
+        self.vertices = []
+        for vertice in __vertice_list__:
+            self.vertices.append(Vertice(vertice))
         self.arestas = []
         self.lista_adjacencia = []
         self.matriz_adjacencia = []
-        for lin in self.vertices:
+        for lin in __vertice_list__:
             self.matriz_adjacencia.append(list(itertools.repeat(0, int(qtd_vertices))))
+        self.lista_adjacencia = []
 
     def __iter__(self):
         yield self.nome
         yield from self.vertices
         yield from self.arestas
+
+    def refresh_matriz_adj(self):
+        for aresta in self.arestas:
+            self.matriz_adjacencia[int(aresta[0] - 1)][int(aresta[1] - 1)] = 1
+            self.matriz_adjacencia[int(aresta[1] - 1)][int(aresta[0] - 1)] = 1
+        return None
 
     def gerate_arestas(self, vertices, qtd_arestas_max):
         if not vertices:
@@ -45,7 +57,7 @@ class Grafo:
             for vp in vertices:
                 v_dest = sample(vertices, randint(0, qtd_arestas_max))
                 for vd in v_dest:
-                    while vp is vd:
+                    while int(vp.nome) is vd:
                         desvio = vd
                         v_dest.remove(vd)
                         if len(v_dest) > 1:
@@ -53,10 +65,9 @@ class Grafo:
                         else:
                             v_dest.insert(0, desvio)
                             break
-                    if ([vd, vp] or [vp, vd]) not in self.arestas:
-                        self.arestas.append([vp, vd])
-                        self.matriz_adjacencia[vd][vp] = 1  # atualiza a matriz de adjacencias
-                        self.matriz_adjacencia[vp][vd] = 1
+                    if ([vd, int(vp.nome)] or [int(vp.nome), vd]) not in self.arestas:
+                        self.arestas.append([int(vp.nome), vd])
+                        self.refresh_matriz_adj()
         return len(self.arestas)
 
     def purge_arestas(self):
@@ -69,10 +80,10 @@ class Grafo:
         # inserir vertice da lista de vertices
         if type(vertice) is list:
             for v in vertice:
-                self.vertices.append(v)
+                self.vertices.append(Vertice(v))
                 self.matriz_adjacencia.append(list(itertools.repeat(0, int(len(self.vertices)))))
         else:
-            self.vertices.append(vertice)
+            self.vertices.append(Vertice(vertice))
             self.matriz_adjacencia.append(list(itertools.repeat(0, int(len(self.vertices)))))
 
     def remove_vertices(self, vertice):

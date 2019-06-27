@@ -24,6 +24,9 @@ class Aresta:
         self.explo = False
         self.desco = False
 
+    def __repr__(self):
+        return '<%s, %s>', self.vert_ini.nome, self.vert_des.nome
+
 
 class Grafo:
     def __init__(self, qtd_vertices):
@@ -45,10 +48,18 @@ class Grafo:
         yield from self.vertices
         yield from self.arestas
 
-    def refresh_matriz_adj(self):
+    def add_matriz_adj(self, vertc):  # TODO: atualizar para o TIPO vertice
         for aresta in self.arestas:
-            self.matriz_adjacencia[int(aresta[0] - 1)][int(aresta[1] - 1)] = 1
-            self.matriz_adjacencia[int(aresta[1] - 1)][int(aresta[0] - 1)] = 1
+            if vertc is aresta.vert_ini or aresta.vert_des:
+                self.matriz_adjacencia[int(aresta.vert_ini.nome) - 1][int(aresta.vert_des.nome) - 1] = 1
+                self.matriz_adjacencia[int(aresta.vert_des.nome) - 1][int(aresta.vert_ini.nome) - 1] = 1
+        return None
+
+    def del_matriz_adj(self, vertc):  # TODO: atualizar para o TIPO vertice
+        for aresta in self.arestas:
+            if vertc is aresta.vert_ini or aresta.vert_des:
+                self.matriz_adjacencia[int(aresta.vert_ini.nome) - 1][int(aresta.vert_des.nome) - 1] = 1
+                self.matriz_adjacencia[int(aresta.vert_des.nome) - 1][int(aresta.vert_ini.nome) - 1] = 1
         return None
 
     def gerate_arestas(self, vertices, qtd_arestas_max):
@@ -67,7 +78,7 @@ class Grafo:
                             break
                     if ([vd, int(vp.nome)] or [int(vp.nome), vd]) not in self.arestas:
                         self.arestas.append([int(vp.nome), vd])
-                        self.refresh_matriz_adj()
+                        self.add_matriz_adj(vp)
         return len(self.arestas)
 
     def purge_arestas(self):
@@ -86,22 +97,31 @@ class Grafo:
             self.vertices.append(Vertice(vertice))
             self.matriz_adjacencia.append(list(itertools.repeat(0, int(len(self.vertices)))))
 
-    def remove_vertices(self, vertice):
+    def remove_vertices(self, vert):
         # remover vertice da lista de vertices
-        if type(vertice) is list:  # Se for uma lista de vertices
-            for v in vertice:
-                self.vertices.remove(v)
-                # remover arestas que possuem esse vertice
-                for a in self.arestas:
-                    if vertice in a:
-                        self.arestas.remove(a)
-        else:   # Se vertice for somente um vertice
-            self.vertices.remove(vertice)
+        if type(vert) is list:  # Se for uma lista de vertices
+            for v in vert:
+                if vert is Vertice:
+                    for vv in self.vertices:
+                        if vv.nome == str(v):
+                            self.vertices.remove(vv)
+                        # remover arestas que possuem esse vertice
+                        for a in self.arestas:  #TODO: mudar aresta para o TIPO Aresta
+                            if vv in a:
+                                self.arestas.remove(a)  # TODO: atualizar a matriz de adjacencias
+                                self.del_matriz_adj()
+                else:
+                    raise TypeError("O valor informado deve der um Vertice.\n Informado: " + str(type(vert)))
+        else:   # Se vertice for somente um Vertice
+            if vert is Vertice:
+                self.vertices.remove(vert)
+            else:
+                raise TypeError("O valor informado deve der um Vertice.\n Informado: " + str(type(vert)))
         # remover arestas que possuem esse vertice
             for a in self.arestas:
-                if vertice in a:
+                if vert in a:
                     self.arestas.remove(a)
-                    self.arestas.sort()
+                    self.arestas.sort()  # TODO: atualizar a matriz de adjacencias
 
     def insert_aresta(self, aresta):
         if (aresta is list) and (len(aresta) == 2):  # Esperando uma aresta no formato [a, b], onde a e b são vertices

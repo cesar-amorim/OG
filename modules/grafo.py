@@ -20,12 +20,13 @@ class Aresta:
         self.nome = str(nome)
         self.vert_ini = Vertice(nome[0])
         self.vert_des = Vertice(nome[1])
+        self.lista_vertices = [self.vert_ini, self.vert_des]
         self.visit = False
         self.explo = False
         self.desco = False
 
     def __repr__(self):
-        return '<%s, %s>', self.vert_ini.nome, self.vert_des.nome
+        return [self.vert_ini.nome, self.vert_des.nome]
 
 
 class Grafo:
@@ -50,14 +51,14 @@ class Grafo:
 
     def add_matriz_adj(self, vertc):  # TODO: atualizar para o TIPO vertice
         for aresta in self.arestas:
-            if vertc is aresta.vert_ini or aresta.vert_des:
+            if vertc in aresta.lista_vertices:
                 self.matriz_adjacencia[int(aresta.vert_ini.nome) - 1][int(aresta.vert_des.nome) - 1] = 1
                 self.matriz_adjacencia[int(aresta.vert_des.nome) - 1][int(aresta.vert_ini.nome) - 1] = 1
         return None
 
     def del_matriz_adj(self, vertc):  # TODO: atualizar para o TIPO vertice
         for aresta in self.arestas:
-            if vertc is aresta.vert_ini or aresta.vert_des:
+            if vertc is aresta.lista_vertices:
                 self.matriz_adjacencia[int(aresta.vert_ini.nome) - 1][int(aresta.vert_des.nome) - 1] = 1
                 self.matriz_adjacencia[int(aresta.vert_des.nome) - 1][int(aresta.vert_ini.nome) - 1] = 1
         return None
@@ -92,9 +93,13 @@ class Grafo:
         if type(vertice) is list:
             for v in vertice:
                 self.vertices.append(Vertice(v))
+                for c in self.matriz_adjacencia:
+                    c.append(0)
                 self.matriz_adjacencia.append(list(itertools.repeat(0, int(len(self.vertices)))))
         else:
             self.vertices.append(Vertice(vertice))
+            for c in self.matriz_adjacencia:
+                c.append(0)
             self.matriz_adjacencia.append(list(itertools.repeat(0, int(len(self.vertices)))))
 
     def remove_vertices(self, vert):
@@ -106,64 +111,72 @@ class Grafo:
                         if vv.nome == str(v):
                             self.vertices.remove(vv)
                         # remover arestas que possuem esse vertice
-                        for a in self.arestas:  #TODO: mudar aresta para o TIPO Aresta
-                            if vv in a:
+                        for a in self.arestas:  # TODO: mudar aresta para o TIPO Aresta
+                            if vv in (a.vert_ini, a.vert_des):
                                 self.arestas.remove(a)  # TODO: atualizar a matriz de adjacencias
-                                self.del_matriz_adj()
+                                self.del_matriz_adj(vv)
                 else:
                     raise TypeError("O valor informado deve der um Vertice.\n Informado: " + str(type(vert)))
         else:   # Se vertice for somente um Vertice
             if vert is Vertice:
                 self.vertices.remove(vert)
+                self.del_matriz_adj(vert)
             else:
                 raise TypeError("O valor informado deve der um Vertice.\n Informado: " + str(type(vert)))
         # remover arestas que possuem esse vertice
             for a in self.arestas:
                 if vert in a:
                     self.arestas.remove(a)
-                    self.arestas.sort()  # TODO: atualizar a matriz de adjacencias
+                    self.arestas.sort()
+                    self.del_matriz_adj(vert)
 
     def insert_aresta(self, aresta):
-        if (aresta is list) and (len(aresta) == 2):  # Esperando uma aresta no formato [a, b], onde a e b são vertices
-            for v in aresta:  # se ligar um vertice existente a um vertice não existente, cria novo vertice
+        if aresta is Aresta:  # Esperando uma aresta do TIPO Aresta
+            for v in aresta.lista_vertices:  # se ligar um vertice existente a um não existente, cria novo vertice
                 if v not in self.vertices:
                     self.insert_vertices(v)
             if aresta not in self.arestas:  # Verificar se já existe a aresta
                 self.arestas.append(aresta)
                 self.arestas.sort()
                 # atualiza a matriz de adjacência
-                self.matriz_adjacencia[aresta[0]][aresta[1]] = 1
-                self.matriz_adjacencia[aresta[1]][aresta[0]] = 1
+                self.add_matriz_adj(aresta.vert_ini)
+                self.add_matriz_adj(aresta.vert_des)
+                # self.matriz_adjacencia[aresta[0]][aresta[1]] = 1
+                # self.matriz_adjacencia[aresta[1]][aresta[0]] = 1
             else:
                 raise ValueError("A aresta " + str(aresta) + "já existe neste grafo")
         else:
-            raise TypeError("A aresta deve ser uma lista com apenas 2 valores\n informado: " + str(aresta))
+            raise TypeError("A aresta deve de tipo Aresta\n informado: " + type(aresta))
 
     def remove_aresta(self, aresta):
-        if (aresta is list) and (len(aresta) == 2):
+        if aresta is Aresta:
             if aresta not in self.arestas:
-                raise ValueError("A aresta " + str(aresta) + "não existe neste grafo")
+                raise ValueError("A aresta " + aresta.nome + "não existe neste grafo")
             else:
                 self.arestas.remove(aresta)
                 # atualiza a matriz de adjacência
-                self.matriz_adjacencia[aresta[0]][aresta[1]] = 0
-                self.matriz_adjacencia[aresta[1]][aresta[0]] = 0
+                self.del_matriz_adj(aresta.vert_ini)
+                self.del_matriz_adj(aresta.vert_des)
+                # self.matriz_adjacencia[aresta[0]][aresta[1]] = 0
+                # self.matriz_adjacencia[aresta[1]][aresta[0]] = 0
         else:
-            raise TypeError("A aresta deve ser uma lista com apenas 2 valores\n informado: " + str(aresta))
+            raise TypeError("A aresta deve do tipo Aresta\n informado: " + str(aresta))
 
     def vizinhos(self, vertice):
-        vizinhos = []
-        # verificar se existe arestas que contem o vertice
-        if vertice in self.vertices:
-            for aresta in self.arestas:
-                for v in aresta:
-                    if vertice in aresta:
-                        if str(v) != str(vertice):
+        if vertice is Vertice:
+            vizinhos = []
+            # verificar se existe arestas que contem o vertice
+            if vertice in self.vertices:
+                for aresta in self.arestas:
+                    for v in aresta.lista_vertices:
+                        if vertice in aresta.lista_vertices and v.nome != vertice.nome:
                             vizinhos.append(v)  # adicionar o outro vertice da aresta a lista
+            else:
+                raise ValueError("Vertice não encontrado no grafo: " + vertice.nome)
         else:
-            raise ValueError("Vertice não encontrado no grafo: " + str(vertice))
-        # retornar a lista de vizinhos
-        vizinhos.sort()
+            TypeError("Valor informado não é um vertice")
+            return None
+        vizinhos.sort()  # retornar a lista de vizinhos
         return vizinhos
 
 

@@ -20,7 +20,7 @@ class Aresta:
         self.nome = str(nome)
         self.vert_ini = Vertice(nome[0])
         self.vert_des = Vertice(nome[1])
-        self.lista_vertices = [self.vert_ini, self.vert_des]
+        self.lista_vertices = (self.vert_ini, self.vert_des)
         self.visit = False
         self.explo = False
         self.desco = False
@@ -51,16 +51,27 @@ class Grafo:
 
     def add_matriz_adj(self, vertc):  # TODO: atualizar para o TIPO vertice
         for aresta in self.arestas:
-            if vertc in aresta.lista_vertices:
-                self.matriz_adjacencia[int(aresta.vert_ini.nome) - 1][int(aresta.vert_des.nome) - 1] = 1
-                self.matriz_adjacencia[int(aresta.vert_des.nome) - 1][int(aresta.vert_ini.nome) - 1] = 1
+            if type(vertc) is Vertice and vertc in aresta:
+                self.matriz_adjacencia[int(aresta[0].nome) - 1][int(aresta[1].nome) - 1] = 1
+                self.matriz_adjacencia[int(aresta[1].nome) - 1][int(aresta[0].nome) - 1] = 1
+            else:
+                if type(vertc) is not Vertice:
+                    raise TypeError("%s nao e um Vertice" % str(type(vertc)))
+                if vertc not in aresta:
+                    pass  # raise ValueError("Vertice inexistente: {0}", vertc.nome)
         return None
 
     def del_matriz_adj(self, vertc):  # TODO: atualizar para o TIPO vertice
         for aresta in self.arestas:
-            if vertc is aresta.lista_vertices:
-                self.matriz_adjacencia[int(aresta.vert_ini.nome) - 1][int(aresta.vert_des.nome) - 1] = 1
-                self.matriz_adjacencia[int(aresta.vert_des.nome) - 1][int(aresta.vert_ini.nome) - 1] = 1
+            if type(vertc) is Vertice and vertc in aresta:
+                if vertc is aresta:
+                    self.matriz_adjacencia[int(aresta[0].nome) - 1][int(aresta[1].nome) - 1] = 1
+                    self.matriz_adjacencia[int(aresta[1].nome) - 1][int(aresta[0].nome) - 1] = 1
+            else:
+                if type(vertc) is not Vertice:
+                    raise TypeError(" %s nao e um Vertice" % str(vertc))
+                if vertc not in aresta:
+                    raise ValueError("Vertice inexistente: %s" % vertc.nome)
         return None
 
     def gerate_arestas(self, vertices, qtd_arestas_max):
@@ -77,8 +88,8 @@ class Grafo:
                         else:
                             v_dest.insert(0, desvio)
                             break
-                    if ([vd, int(vp.nome)] or [int(vp.nome), vd]) not in self.arestas:
-                        self.arestas.append([int(vp.nome), vd])
+                    if ([vd, vp] or [vp, vd]) not in self.arestas:
+                        self.arestas.append([vp, vd])
                         self.add_matriz_adj(vp)
         return len(self.arestas)
 

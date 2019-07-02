@@ -10,23 +10,37 @@ class Vertice:
         self.visit = False
         self.adjcs = []
 
-    @property
     def __str__(self):
-        return self.nome
+        return "«{0}» em:{1}".format(self.nome, id(self))
 
 
 class Aresta:
     def __init__(self, nome):
-        self.nome = str(nome)
-        self.vert_ini = Vertice(nome[0])
-        self.vert_des = Vertice(nome[1])
+        if type(nome) is list and len(nome) == 2:
+            if type(nome[0]) is Vertice:
+                self.vert_ini = nome[0]
+            else:
+                self.vert_ini = Vertice(nome[0])
+            if type(nome[1]) is Vertice:
+                self.vert_des = nome[1]
+            else:
+                self.vert_des = Vertice(nome[1])
+        else:
+            self.nome = str(nome)
+            self.vert_ini = Vertice(nome[0])
+            self.vert_des = Vertice(nome[1])
         self.lista_vertices = (self.vert_ini, self.vert_des)
         self.visit = False
         self.explo = False
         self.desco = False
 
-    def __repr__(self):
-        return [self.vert_ini.nome, self.vert_des.nome]
+    def __iter__(self):
+        yield self.nome
+        yield self.vert_ini
+        yield self.vert_des
+
+    def __str__(self):
+        return "[({0}, {1}): em {2}]".format(self.vert_ini.nome, self.vert_des.nome, id(self))
 
 
 class Grafo:
@@ -38,7 +52,6 @@ class Grafo:
         for vertice in __vertice_list__:
             self.vertices.append(Vertice(vertice))
         self.arestas = []
-        self.lista_adjacencia = []
         self.matriz_adjacencia = []
         for lin in __vertice_list__:
             self.matriz_adjacencia.append(list(itertools.repeat(0, int(qtd_vertices))))
@@ -89,7 +102,7 @@ class Grafo:
                             v_dest.insert(0, desvio)
                             break
                     if ([vd, vp] or [vp, vd]) not in self.arestas:
-                        self.arestas.append([vp, vd])
+                        self.arestas.append(Aresta([vp, vd]))
                         self.add_matriz_adj(vp)
         return len(self.arestas)
 
@@ -196,8 +209,16 @@ def ler_de_arquivo(arq):
     dic = ast.literal_eval(cont)
     grf = Grafo(0)
     grf.nome = dic['nome']
-    grf.vertices = dic['vertices']
-    grf.arestas = dic['arestas']
+    # grf.vertices = dic['vertices']
+    for v in dic['vertices']:
+        grf.vertices.append(Vertice(v))
+    grf.qtd_vertices = int(len(grf.vertices))
+    # grf.arestas = dic['arestas']
+    for a in dic['arestas']:
+        grf.arestas.append(Aresta(a))
+    for l in grf.vertices:
+        grf.matriz_adjacencia.append(list(itertools.repeat(0, grf.qtd_vertices)))
+
     return grf
 
 

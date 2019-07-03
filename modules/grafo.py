@@ -209,26 +209,29 @@ class Grafo:
 def ler_de_arquivo(arq):
     cont = open(arq, 'r').read()
     dic = ast.literal_eval(cont)
-    grf = Grafo(0)
-    grf.nome = dic['nome']
+    grf = Grafo(0)  # Cria um Grafo vazio
+    grf.nome = dic['nome']  # Extrai o nome do arquivo e inclui direto no grafo vazio
     lista = []
     # grf.vertices = dic['vertices']
     for v in dic['vertices']:
-        grf.vertices.append(Vertice(v))
-    grf.qtd_vertices = int(len(grf.vertices))
+        grf.vertices.append(Vertice(v))  # Cria um Vertice para cada vertice extraido do arquivo e inclui em vertices
+    grf.qtd_vertices = int(len(grf.vertices))  # atualiza o Numero de vertices
     # grf.arestas = dic['arestas']
-    for a in dic['arestas']:
-        if type(a) is list and len(a) == 2:
-            for v in a:
-                for vertc in grf.vertices:
-                    if str(v) == vertc.nome:
-                        lista.append(vertc)
-            grf.arestas.append(Aresta(lista))
-            lista.clear()
+    for a in dic['arestas']:  # para cada aresta do arquivo...
+        if type(a) is list and len(a) == 2:  # verifica se é válida (uma lista com 2 elementos)...
+            for v in a:                         # e para cada elemento dessa lista de 2...
+                for vertc in grf.vertices:      # verifica se corresponde a um vertice obtidos...
+                    if str(v) == vertc.nome:    # através do nome...
+                        lista.append(vertc)     # e junta a uma lista parcial...
+            grf.arestas.append(Aresta(lista))   # para gerar uma aresta com esses 2 vertices
+            lista.clear()  # limpa a lista parcial para recomeçar
         else:
-            grf.arestas.append(Aresta(a))
-    for l in grf.vertices:
+            grf.arestas.append(Aresta(a))  # caso não ache o vertice em vértices, registra como uma lista de vertices, não uma resta
+
+    for x in range(0, grf.qtd_vertices):  # reeinicia a matriz de adjacencia vazia com os vértices inseridos anteriormente
         grf.matriz_adjacencia.append(list(itertools.repeat(0, grf.qtd_vertices)))
+    for v in grf.vertices:  # popula a matriz de adjacencia vazia com os vértices inseridos anteriormente
+        grf.add_matriz_adj(v)
 
     return grf
 

@@ -29,6 +29,7 @@ class Aresta:
             self.nome = str(nome)
             self.vert_ini = Vertice(nome[0])
             self.vert_des = Vertice(nome[1])
+        self.nome = "{0}{1}".format(self.vert_ini.nome, self.vert_des.nome)
         self.lista_vertices = (self.vert_ini, self.vert_des)
         self.visit = False
         self.explo = False
@@ -36,11 +37,12 @@ class Aresta:
 
     def __iter__(self):
         yield self.nome
+        yield self.lista_vertices
         yield self.vert_ini
         yield self.vert_des
 
     def __str__(self):
-        return "[({0}, {1}): em {2}]".format(self.vert_ini.nome, self.vert_des.nome, id(self))
+        return "[({0}): em: {1}]".format(self.nome, id(self))
 
 
 class Grafo:
@@ -65,8 +67,8 @@ class Grafo:
     def add_matriz_adj(self, vertc):  # TODO: atualizar para o TIPO vertice
         for aresta in self.arestas:
             if type(vertc) is Vertice and vertc in aresta:
-                self.matriz_adjacencia[int(aresta[0].nome) - 1][int(aresta[1].nome) - 1] = 1
-                self.matriz_adjacencia[int(aresta[1].nome) - 1][int(aresta[0].nome) - 1] = 1
+                self.matriz_adjacencia[int(aresta.lista_vertices[0].nome) - 1][int(aresta.lista_vertices[1].nome) - 1] = 1
+                self.matriz_adjacencia[int(aresta.lista_vertices[1].nome) - 1][int(aresta.lista_vertices[0].nome) - 1] = 1
             else:
                 if type(vertc) is not Vertice:
                     raise TypeError("%s nao e um Vertice" % str(type(vertc)))
@@ -209,13 +211,22 @@ def ler_de_arquivo(arq):
     dic = ast.literal_eval(cont)
     grf = Grafo(0)
     grf.nome = dic['nome']
+    lista = []
     # grf.vertices = dic['vertices']
     for v in dic['vertices']:
         grf.vertices.append(Vertice(v))
     grf.qtd_vertices = int(len(grf.vertices))
     # grf.arestas = dic['arestas']
     for a in dic['arestas']:
-        grf.arestas.append(Aresta(a))
+        if type(a) is list and len(a) == 2:
+            for v in a:
+                for vertc in grf.vertices:
+                    if str(v) == vertc.nome:
+                        lista.append(vertc)
+            grf.arestas.append(Aresta(lista))
+            lista.clear()
+        else:
+            grf.arestas.append(Aresta(a))
     for l in grf.vertices:
         grf.matriz_adjacencia.append(list(itertools.repeat(0, grf.qtd_vertices)))
 

@@ -149,8 +149,7 @@ class Grafo:
                 self.del_matriz_adj(vert)
             else:
                 raise TypeError("O valor informado deve der um Vertice.\n Informado: " + str(type(vert)))
-        # remover arestas que possuem esse vertice
-            for a in self.arestas:
+            for a in self.arestas:  # remover arestas que possuem esse vertice
                 if vert in a:
                     self.arestas.remove(a)
                     self.arestas.sort()
@@ -164,11 +163,8 @@ class Grafo:
             if aresta not in self.arestas:  # Verificar se já existe a aresta
                 self.arestas.append(aresta)
                 self.arestas.sort()
-                # atualiza a matriz de adjacência
-                self.add_matriz_adj(aresta.vert_ini)
+                self.add_matriz_adj(aresta.vert_ini)  # atualiza a matriz de adjacência
                 self.add_matriz_adj(aresta.vert_des)
-                # self.matriz_adjacencia[aresta[0]][aresta[1]] = 1
-                # self.matriz_adjacencia[aresta[1]][aresta[0]] = 1
             else:
                 raise ValueError("A aresta " + str(aresta) + "já existe neste grafo")
         else:
@@ -180,30 +176,28 @@ class Grafo:
                 raise ValueError("A aresta " + aresta.nome + "não existe neste grafo")
             else:
                 self.arestas.remove(aresta)
-                # atualiza a matriz de adjacência
-                self.del_matriz_adj(aresta.vert_ini)
+                self.del_matriz_adj(aresta.vert_ini)  # atualiza a matriz de adjacência
                 self.del_matriz_adj(aresta.vert_des)
-                # self.matriz_adjacencia[aresta[0]][aresta[1]] = 0
-                # self.matriz_adjacencia[aresta[1]][aresta[0]] = 0
         else:
             raise TypeError("A aresta deve do tipo Aresta\n informado: " + str(aresta))
 
     def vizinhos(self, vertice):
-        if vertice is Vertice:
+        if type(vertice) is Vertice:
             vizinhos = []
-            # verificar se existe arestas que contem o vertice
-            if vertice in self.vertices:
+            if vertice in self.vertices:  # verificar se existe arestas que contem o vertice
                 for aresta in self.arestas:
                     for v in aresta.lista_vertices:
-                        if vertice in aresta.lista_vertices and v.nome != vertice.nome:
-                            vizinhos.append(v)  # adicionar o outro vertice da aresta a lista
+                        if vertice in aresta.lista_vertices \
+                                and v.nome != vertice.nome \
+                                and int(v.nome) not in vizinhos:
+                            vizinhos.append(int(v.nome))  # adicionar o outro vertice da aresta a lista
             else:
                 raise ValueError("Vertice não encontrado no grafo: " + vertice.nome)
         else:
             TypeError("Valor informado não é um vertice")
             return None
-        vizinhos.sort()  # retornar a lista de vizinhos
-        return vizinhos
+        vizinhos.sort()
+        return vizinhos  # retornar a lista de vizinhos
 
 
 def ler_de_arquivo(arq):
@@ -217,8 +211,8 @@ def ler_de_arquivo(arq):
         grf.vertices.append(Vertice(v))  # Cria um Vertice para cada vertice extraido do arquivo e inclui em vertices
     grf.qtd_vertices = int(len(grf.vertices))  # atualiza o Numero de vertices
     # grf.arestas = dic['arestas']
-    for a in dic['arestas']:  # para cada aresta do arquivo...
-        if type(a) is list and len(a) == 2:  # verifica se é válida (uma lista com 2 elementos)...
+    for a in dic['arestas']:                    # para cada aresta do arquivo...
+        if type(a) is list and len(a) == 2:     # verifica se é válida (uma lista com 2 elementos)...
             for v in a:                         # e para cada elemento dessa lista de 2...
                 for vertc in grf.vertices:      # verifica se corresponde a um vertice obtidos...
                     if str(v) == vertc.nome:    # através do nome...
@@ -227,12 +221,11 @@ def ler_de_arquivo(arq):
             lista.clear()  # limpa a lista parcial para recomeçar
         else:
             grf.arestas.append(Aresta(a))  # caso não ache o vertice em vértices, registra como uma lista de vertices, não uma resta
-
     for x in range(0, grf.qtd_vertices):  # reeinicia a matriz de adjacencia vazia com os vértices inseridos anteriormente
         grf.matriz_adjacencia.append(list(itertools.repeat(0, grf.qtd_vertices)))
-    for v in grf.vertices:  # popula a matriz de adjacencia vazia com os vértices inseridos anteriormente
-        grf.add_matriz_adj(v)
-
+    for v in grf.vertices:
+        grf.add_matriz_adj(v)  # popular matriz de adjacencia vazia com os vértices inseridos anteriormente
+        grf.lista_adjacencia.append(grf.vizinhos(v))  # popular lista de adjacências
     return grf
 
 

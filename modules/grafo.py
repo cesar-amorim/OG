@@ -92,20 +92,25 @@ class Grafo:
     def gerate_arestas(self, vertices, qtd_arestas_max):
         if not vertices:
             vertices = self.vertices
-            for vp in vertices:
-                v_dest = sample(vertices, randint(0, qtd_arestas_max))
-                for vd in v_dest:
-                    while int(vp.nome) is vd:
-                        desvio = vd
-                        v_dest.remove(vd)
-                        if len(v_dest) > 1:
-                            vd = sample(v_dest, 1)[0]
-                        else:
-                            v_dest.insert(0, desvio)
-                            break
-                    if ([vd, vp] or [vp, vd]) not in self.arestas:
-                        self.arestas.append(Aresta([vp, vd]))
-                        self.add_matriz_adj(vp)
+        for vp in vertices:
+            v_dest = sample(vertices, randint(0, qtd_arestas_max))
+            for vd in v_dest:
+                while int(vp.nome) is vd:
+                    desvio = vd
+                    v_dest.remove(vd)
+                    if len(v_dest) > 1:
+                        vd = sample(v_dest, 1)[0]
+                    else:
+                        v_dest.insert(0, desvio)
+                        break
+                if ([vd, vp] or [vp, vd]) not in self.arestas:
+                    self.arestas.append(Aresta([vp, vd]))
+                    self.add_matriz_adj(vp)
+        if all(type(x) is Vertice for x in vertices):
+            for v in vertices:
+                self.lista_adjacencia.append(self.vizinhos(v))
+        else:
+            TypeError("Um nao-vertice foi informado em {0}".format(vertices))
         return len(self.arestas)
 
     def purge_arestas(self):

@@ -2,47 +2,8 @@ from random import sample, randint
 # import json
 import ast
 import itertools
-
-
-class Vertice:
-    def __init__(self, nome):
-        self.nome = str(nome)
-        self.visit = False
-        self.adjcs = []
-
-    def __str__(self):
-        return "«{0}» em:{1}".format(self.nome, id(self))
-
-
-class Aresta:
-    def __init__(self, nome):
-        if type(nome) is list and len(nome) == 2:
-            if type(nome[0]) is Vertice:
-                self.vert_ini = nome[0]
-            else:
-                self.vert_ini = Vertice(nome[0])
-            if type(nome[1]) is Vertice:
-                self.vert_des = nome[1]
-            else:
-                self.vert_des = Vertice(nome[1])
-        else:
-            self.nome = str(nome)
-            self.vert_ini = Vertice(nome[0])
-            self.vert_des = Vertice(nome[1])
-        self.nome = "{0}{1}".format(self.vert_ini.nome, self.vert_des.nome)
-        self.lista_vertices = (self.vert_ini, self.vert_des)
-        self.visit = False
-        self.explo = False
-        self.desco = False
-
-    def __iter__(self):
-        yield self.nome
-        yield self.lista_vertices
-        yield self.vert_ini
-        yield self.vert_des
-
-    def __str__(self):
-        return "[({0}): em: {1}]".format(self.nome, id(self))
+from vertice import Vertice
+from aresta import Aresta
 
 
 class Grafo:
@@ -64,7 +25,7 @@ class Grafo:
         yield from self.vertices
         yield from self.arestas
 
-    def add_matriz_adj(self, vertc):  # TODO: atualizar para o TIPO vertice
+    def add_matriz_adj(self, vertc):
         for aresta in self.arestas:
             if type(vertc) is Vertice and vertc in aresta:
                 self.matriz_adjacencia[int(aresta.lista_vertices[0].nome) - 1][int(aresta.lista_vertices[1].nome) - 1] = 1
@@ -76,7 +37,7 @@ class Grafo:
                     pass  # raise ValueError("Vertice inexistente: {0}", vertc.nome)
         return None
 
-    def del_matriz_adj(self, vertc):  # TODO: atualizar para o TIPO vertice
+    def del_matriz_adj(self, vertc):
         for aresta in self.arestas:
             if type(vertc) is Vertice and vertc in aresta:
                 if vertc is aresta:
@@ -142,9 +103,9 @@ class Grafo:
                         if vv.nome == str(v):
                             self.vertices.remove(vv)
                         # remover arestas que possuem esse vertice
-                        for a in self.arestas:  # TODO: mudar aresta para o TIPO Aresta
+                        for a in self.arestas:
                             if vv in (a.vert_ini, a.vert_des):
-                                self.arestas.remove(a)  # TODO: atualizar a matriz de adjacencias
+                                self.arestas.remove(a)
                                 self.del_matriz_adj(vv)
                 else:
                     raise TypeError("O valor informado deve der um Vertice.\n Informado: " + str(type(vert)))

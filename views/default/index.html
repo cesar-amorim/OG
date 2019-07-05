@@ -25,7 +25,7 @@
         _href=URL('admin','default','peek',args=(request.application,'views',request.controller,'index.html')))))}}</li>
       <li>{{=T('You can modify this application and adapt it to your needs')}}</li>
     </ol>
-        <p>{{=BEAUTIFY(grafo)}}</p>
+        <li class="list-group">{{for e in grafo:}}<ul class="list-group-item">{{if type(e) is not str:}}{{=e.nome}}{{else:}}{{=e}}{{pass}}</ul>{{pass}}</li>
     <div class="jumbotron jumbotron-fluid" style="padding:30px;word-wrap:break-word;">
       <div class="container center">
         <a class="btn btn-primary" href="{{=URL('admin','default','index')}}">

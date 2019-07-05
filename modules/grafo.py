@@ -1,9 +1,9 @@
 from random import sample, randint
-# import json
-import ast
-import itertools
 from vertice import Vertice
 from aresta import Aresta
+import ast
+import itertools
+# import json
 
 
 class Grafo:
@@ -14,9 +14,9 @@ class Grafo:
         self.vertices = []
         for vertice in __vertice_list__:
             self.vertices.append(Vertice(vertice))
-        self.arestas = []
+        self.arestas = set()
         self.matriz_adjacencia = []
-        for lin in __vertice_list__:
+        for k in range(0, qtd_vertices):
             self.matriz_adjacencia.append(list(itertools.repeat(0, int(qtd_vertices))))
         self.lista_adjacencia = []
 
@@ -51,22 +51,33 @@ class Grafo:
         return None
 
     def gerate_arestas(self, vertices, qtd_arestas_max):
+        aresta = set()
         if not vertices:
             vertices = self.vertices
-        for vp in vertices:
-            v_dest = sample(vertices, randint(0, qtd_arestas_max))
-            for vd in v_dest:
-                while int(vp.nome) is vd:
-                    desvio = vd
-                    v_dest.remove(vd)
-                    if len(v_dest) > 1:
-                        vd = sample(v_dest, 1)[0]
-                    else:
-                        v_dest.insert(0, desvio)
-                        break
-                if ([vd, vp] or [vp, vd]) not in self.arestas:
-                    self.arestas.append(Aresta([vp, vd]))
-                    self.add_matriz_adj(vp)
+        for v_part in vertices:
+            v_destino = sample(vertices, randint(0, qtd_arestas_max))
+            aresta.add(v_part)
+            for v_dest in v_destino:
+                aresta.add(v_dest)
+                if len(aresta) == 2:
+                    a = Aresta(aresta)
+                    self.arestas.add(a)
+                else:
+                    pass
+                #     while v_part is v_dest:
+                #         desvio = v_dest
+                #         v_destino.remove(v_dest)
+                #         if len(v_destino) > 1:
+                #             v_dest = sample(v_destino, 1)[0]
+                #         else:
+                #             v_destino.insert(0, desvio)
+                #             break
+                if v_dest.nome != v_part.nome:
+                    # if not(any((v_dest, v_part) in a for a in self.arestas) and any((v_part, v_dest) in a for a in self.arestas)):
+                    #     self.arestas.add(Aresta([v_part, v_dest]))
+                    self.add_matriz_adj(v_part)
+                    self.add_matriz_adj(v_dest)
+            aresta.clear()
         if all(type(x) is Vertice for x in vertices):
             for v in vertices:
                 self.lista_adjacencia.append(self.vizinhos(v))
@@ -118,7 +129,7 @@ class Grafo:
             for a in self.arestas:  # remover arestas que possuem esse vertice
                 if vert in a:
                     self.arestas.remove(a)
-                    self.arestas.sort()
+                    # self.arestas.sort()
                     self.del_matriz_adj(vert)
 
     def insert_aresta(self, aresta):
@@ -127,8 +138,8 @@ class Grafo:
                 if v not in self.vertices:
                     self.insert_vertices(v)
             if aresta not in self.arestas:  # Verificar se já existe a aresta
-                self.arestas.append(aresta)
-                self.arestas.sort()
+                self.arestas.add(aresta)
+                # self.arestas.sort()
                 self.add_matriz_adj(aresta.vert_ini)  # atualiza a matriz de adjacência
                 self.add_matriz_adj(aresta.vert_des)
             else:
@@ -183,10 +194,10 @@ def ler_de_arquivo(arq):
                 for vertc in grf.vertices:      # verifica se corresponde a um vertice obtidos...
                     if str(v) == vertc.nome:    # através do nome...
                         lista.append(vertc)     # e junta a uma lista parcial...
-            grf.arestas.append(Aresta(lista))   # para gerar uma aresta com esses 2 vertices
+            grf.arestas.add(Aresta(lista))   # para gerar uma aresta com esses 2 vertices
             lista.clear()  # limpa a lista parcial para recomeçar
         else:
-            grf.arestas.append(Aresta(a))  # caso não ache o vertice em vértices, registra como uma lista de vertices, não uma resta
+            grf.arestas.add(Aresta(a))  # caso não ache o vertice em vértices, registra como uma lista de vertices, não uma resta
     for x in range(0, grf.qtd_vertices):  # reeinicia a matriz de adjacencia vazia com os vértices inseridos anteriormente
         grf.matriz_adjacencia.append(list(itertools.repeat(0, grf.qtd_vertices)))
     for v in grf.vertices:
@@ -195,92 +206,5 @@ def ler_de_arquivo(arq):
     return grf
 
 
-def transforma_em_mda(g):
-    return []
-
-
-def salvar_em_arquivo(grafo, arq):
-    pass
-
-
-# def gerar_grafo_randomico(qtd_vertices):
-#     nome = ("grafo_" + str(qtd_vertices))
-#     vertices = []
-#     arestas = []
-#     qtd_vertices = int(qtd_vertices)
-#     for v in range(1, (qtd_vertices + 1)):
-#         vertices.append(v)
-#     for vp in vertices:
-#         qtd_arestas = randint(1, round((qtd_vertices - 1)/2) + 1)
-#         v_destinos = sample(vertices, qtd_arestas)
-#         for vd in v_destinos:
-#             while vp is vd:
-#                 desvio = vd
-#                 v_destinos.remove(vd)
-#                 if len(v_destinos) > 1:
-#                     vd = sample(v_destinos, 1)[0]
-#                 else:
-#                     v_destinos.insert(0, desvio)
-#                     break
-#             if [vd, vp] not in arestas:
-#                 arestas.append([vp, vd])
-#     return {"nome": nome, "vertices": vertices, "arestas": arestas}
-
-
-# def ler_grafo_de(arq):
-#     if not isinstance(arq, _io.TextIOWrapper):
-#         raise TypeError("arq deve ser um arquivo")
-#     else:
-#         g = json.load(arq)
-#     return g
-
-
-# class Grafo(dict):
-#     # def _get_grafo(self):
-#     #     return self.__grafo
-#     #
-#     # def _set_grafo(self, value):
-#     #     if not isinstance(value, dict):
-#     #         raise TypeError("g deve ser um Dicionário")
-#     #     self.__grafo = value
-#
-#     def _get_nome(self):
-#         return self.nome
-#
-#     def _set_nome(self, valor):
-#         if not isinstance(valor, str):
-#             raise TypeError("O valor deve ser uma string")
-#
-#     nome = property(_get_nome, _set_nome)
-#
-#     def _get_vertices(self):
-#         return self.vertices
-#
-#     def _set_vertices(self, valor):
-#         if not isinstance(valor, list):
-#             raise TypeError("O valor deve ser uma lista")
-#
-#     vertices = property(_get_vertices, _set_vertices)
-#
-#     # grafo = property(_get_grafo, _set_grafo)
-
-
-
-
-# def adiciona_vertice_em(arq, v=int):
-#     g = {}
-#     g.update(ler_grafo_de(arq))
-#     vertices = g['vertices']
-#     vertices.append[v]
-#     return dict(grafo=g)
-#
-#
-# def remove_vertice_em(arq, v=int):
-#     g = {}
-#     g.update(ler_grafo_de(arq))
-#     list(g['vertices']).remove(v)
-#     for e in list(g['arestas']):
-#         list(e).remove(v)
-#         if len(list(e)) < 2:
-#             list(e).clear()
-#     return dict(grafo=g)
+# def salvar_em_arquivo(grafo, arq):
+#     pass
